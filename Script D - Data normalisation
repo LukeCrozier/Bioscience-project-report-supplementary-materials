@@ -1,0 +1,61 @@
+#Language=R
+
+# Locate files
+DiamondResults1=choose.files(default = "", caption = "Select Dia results", multi = FALSE)
+setwd(dirname(DiamondResults1))
+TimeFile=choose.files(default = "", caption = "Select Frame record", multi = FALSE)
+CellResults1=choose.files(default = "", caption = "Select Cell results", multi = FALSE)
+ControlResults1=choose.files(default = "", caption = "Select C1 results", multi = FALSE)
+ControlResults2=choose.files(default = "", caption = "Select C2 results", multi = FALSE)
+ControlResults3=choose.files(default = "", caption = "Select C3 results", multi = FALSE)
+ControlResults4=choose.files(default = "", caption = "Select C4 results", multi = FALSE)
+
+#read files
+
+RawDiaData1=read.csv(DiamondResults1,header=TRUE)
+RawCellData1=read.csv(CellResults1,header=TRUE)
+TimeCSV=read.csv(TimeFile,header=TRUE)
+RawContData1=read.csv(ControlResults1,header=TRUE)
+RawContData2=read.csv(ControlResults2,header=TRUE)
+RawContData3=read.csv(ControlResults3,header=TRUE)
+RawContData4=read.csv(ControlResults4,header=TRUE)
+
+#Extract information
+DiaIdentifier=substr(DiamondResults1,42,(nchar(DiamondResults1)-4))
+
+DiamondMean=RawDiaData1[[3]]
+CellMean=RawCellData1[[3]]
+TimeVector=TimeCSV[[2]]
+ControlMean1=RawContData1[[3]]
+ControlMean2=RawContData2[[3]]
+ControlMean3=RawContData3[[3]]
+ControlMean4=RawContData4[[3]]
+
+#Normalise data against the cell average
+NormDia=DiamondMean/CellMean
+NormCont1=ControlMean1/CellMean
+NormCont2=ControlMean2/CellMean
+NormCont3=ControlMean3/CellMean
+NormCont4=ControlMean4/CellMean
+
+#Calculate data as a percentage of first data value
+
+PercentDia=(100*((NormDia/(NormDia[1]))-1))
+PercentCont1=(100*((NormCont1/(NormCont1[1]))-1))
+PercentCont2=(100*((NormCont2/(NormCont2[1]))-1))
+PercentCont3=(100*((NormCont3/(NormCont3[1]))-1))
+PercentCont4=(100*((NormCont4/(NormCont4[1]))-1))
+
+#save output
+Output=data.frame(TimeVector,PercentDia,PercentCont1,PercentCont2,PercentCont3,PercentCont4)
+names(Output)[names(Output)=="PercentDia"] <- DiaIdentifier
+write.csv(Output,file=paste("Percent change for ",DiaIdentifier,".csv"))
+
+#Make a pretty graph
+
+tiff(paste('Normalised Percentage brightness',DiaIdentifier,'.tif'))
+matplot (TimeVector, cbind (PercentDia,PercentCont1,PercentCont2,PercentCont3,PercentCont4), pch = c(19,1,1,1,1), xlab = "Time (minutes)",ylab = "% brightness change",main="Normalised % brightness")
+
+dev.off()
+
+rm(list=ls())
