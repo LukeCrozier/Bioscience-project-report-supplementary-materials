@@ -1,6 +1,7 @@
-  // Code to measure an circle around a diamond shadow ROI at each time frame -ImageJ1 Macro Language
+// Macro to measure an circle around a diamond shadow ROI at each time frame - ImageJ1 Macro Language
 
-// File selection
+//Locate source file
+
   ABCpath = File.openDialog("Select image File");
    AverageBgCorrected=File.getName(ABCpath);
    ABCdir= File.getParent(ABCpath);
@@ -27,17 +28,23 @@ selectWindow(AverageBgCorrected);
 run("Clear Results");
 
 //sort and save the ROIs, should be 1 for each frame
+
 roiManager("Sort");
 run("Select All");
 roiManager("Save", ABCdir+"/Diamond sites "+Genotype+" "+GIN+" D"+DiamondNumber+" "+DateTaken+".zip");
    roiManager("List");
     selectWindow("Overlay Elements");
+    
+    //save file of ROI XY coordinates
+    
  saveAs("Results", ABCdir+"/Diamond locations for "+DateTaken+" "+Genotype+GIN+" D"+DiamondNumber+".csv");
     run("Clear Results");
    XYpath = File.openDialog("Select XY coord file");
    XYname=File.getName(XYpath);
    XYdir= File.getParent(XYpath);
+   
 // draw ovals centred on each ROI from before
+
 selectWindow(AverageBgCorrected);
 open(XYpath);
 
