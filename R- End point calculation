@@ -1,0 +1,110 @@
+#R 
+#Code to find average percentage change in the 5 data after 20 minutes of all files within a folder
+#begins with normalised percentage change CSV files for a given genotype
+
+#set working directory
+
+wd=choose.dir(default = "", caption = "Select WD ")
+setwd(wd)
+
+#locate folder with normalised percentage data files
+
+PercentFiledir=choose.dir(default = "", caption = "Select Percent data folder ")
+PercentFileNames=dir(PercentFiledir)
+
+#create empty variables
+AllDiaSD=numeric()
+AllDiaMean=numeric()
+AllContMean=numeric()
+AllContSD=numeric()
+FinalTime=numeric()
+DiaIdentifierList=character()
+
+#loop for all files in the chosen directory
+
+for(i in 1:length(PercentFileNames)){
+  path<-paste(PercentFiledir,"\\",PercentFileNames[i],sep="")
+  
+  # read files
+  
+  PercentDataframe=read.csv(path,header=TRUE)
+  DiaIdentifier=substr(colnames(PercentDataframe[3]),2,nchar(colnames(PercentDataframe[3])))
+  
+  Time=PercentDataframe[[2]]
+  PercentDia=PercentDataframe[[3]]
+  PercentCont1=PercentDataframe[[4]]
+  PercentCont2=PercentDataframe[[5]]
+  PercentCont3=PercentDataframe[[6]]
+  PercentCont4=PercentDataframe[[7]]
+
+  #find first 5 data points after 20 minutes 
+  #create mean and SD for those data 
+  #repeat for control sites
+  
+ NewTime=0
+for(t in 1:length(Time)){
+  if(NewTime==0){
+  if(Time[[t]]>19){(NewTime=t)
+  }}
+}
+  
+ 
+  WinDiaData=numeric()
+  WinDiaTime=numeric()
+   WinCont1Data=numeric()
+   WinCont2Data=numeric()
+   WinCont3Data=numeric()
+   WinCont4Data=numeric()
+  for(i in NewTime:(NewTime+4)){
+
+    WinDiaData=c(WinDiaData,PercentDia[[i]])
+    WinDiaTime=c(Time[i])
+    
+    DiaSD=sd(WinDiaData)
+    DiaMean=mean(WinDiaData)
+  
+ 
+  WinCont1Data=c(WinCont1Data,PercentCont1[[i]])
+
+  Cont1SD=sd(WinCont1Data)
+  Cont1Mean=mean(WinCont1Data)
+  
+  WinCont2Data=c(WinCont2Data,PercentCont2[[i]])
+  
+  Cont2SD=sd(WinCont2Data)
+  Cont2Mean=mean(WinCont2Data)
+  
+  WinCont3Data=c(WinCont3Data,PercentCont3[[i]])
+  
+  Cont3SD=sd(WinCont3Data)
+  Cont3Mean=mean(WinCont3Data)
+  
+  WinCont4Data=c(WinCont4Data,PercentCont4[[i]])
+  
+  Cont4SD=sd(WinCont4Data)
+  Cont4Mean=mean(WinCont4Data)
+
+}
+
+#group all data together
+   
+AllDiaSD=c(AllDiaSD,DiaSD)
+AllDiaMean=c(AllDiaMean,DiaMean)
+
+ContMean=mean(Cont1Mean,Cont2Mean,Cont3Mean,Cont4Mean)
+AllContMean=c(AllContMean,ContMean)
+ContSD=mean(Cont1SD,Cont2SD,Cont3SD,Cont4SD)
+AllContSD=c(AllContSD,ContSD)
+FinalTime=c(FinalTime,WinDiaTime)
+DiaIdentifierList=c(DiaIdentifierList,DiaIdentifier)
+ }
+# test significance and save output
+  All.SD.KTest=kruskal.test(list(AllDiaMean,AllContMean)) 
+  Datasummary=data.frame(DiaIdentifierList,FinalTime,AllDiaSD,AllDiaMean,AllContSD,AllContMean,All.SD.KTest$p.value)
+  write.csv(Datasummary,file=paste("Data for Cont SD.csv"))
+  
+  
+ 
+
+  
+
