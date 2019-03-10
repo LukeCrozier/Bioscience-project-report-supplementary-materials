@@ -1,4 +1,4 @@
-#R 
+#Language = R 
 #Code to find average percentage change in the 5 data after 20 minutes of all files within a folder
 #begins with normalised percentage change CSV files for a given genotype
 
