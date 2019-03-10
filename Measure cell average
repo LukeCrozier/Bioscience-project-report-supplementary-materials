@@ -14,7 +14,7 @@ ABCpath = File.openDialog("Select image File");
   
   Dialog.create("Diamond Data")
    Dialog.addChoice("Date Taken",newArray("Various Date options")); 
-   Dialog.addChoice("Genotype", newArray("Triple","og","Exo84b","ARP2")); 
+   Dialog.addChoice("Genotype", newArray("ForminTriple","Col0","exo84b","arp2")); 
    Dialog.addNumber("GIN", 1); 
    Dialog.addNumber("Cell Number",1); 
    Dialog.addNumber("Control Number",1); 
