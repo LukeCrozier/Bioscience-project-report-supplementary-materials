@@ -1,3 +1,6 @@
+  // Code to measure an circle around a diamond shadow ROI at each time frame -ImageJ1 Macro Language
+
+// File selection
   ABCpath = File.openDialog("Select image File");
    AverageBgCorrected=File.getName(ABCpath);
    ABCdir= File.getParent(ABCpath);
