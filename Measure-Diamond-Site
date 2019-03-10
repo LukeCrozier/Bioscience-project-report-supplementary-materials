@@ -1,0 +1,117 @@
+  ABCpath = File.openDialog("Select image File");
+   AverageBgCorrected=File.getName(ABCpath);
+   ABCdir= File.getParent(ABCpath);
+
+//gather information about the file
+
+  Dialog.create("Diamond Data")
+   Dialog.addChoice("Date Taken",newArray("Date options")); 
+   Dialog.addChoice("Genotype", newArray("ForminTriple","Col0","exo84b","arp2")); 
+   Dialog.addNumber("GIN", 1); 
+   Dialog.addNumber("Diamond Number",1);
+   Dialog.addNumber("Reaction Diameter",75); 
+   Dialog.show();
+   DateTaken = Dialog.getChoice();
+   Genotype = Dialog.getChoice();;
+   GIN = Dialog.getNumber();
+   DiamondNumber = Dialog.getNumber();;
+   ReactionDiameter = Dialog.getNumber();;;
+   open(ABCpath);
+   selectWindow(AverageBgCorrected);
+   OriginalFrameNumber=nSlices
+
+selectWindow(AverageBgCorrected);
+run("Clear Results");
+
+//sort and save the ROIs, should be 1 for each frame
+roiManager("Sort");
+run("Select All");
+roiManager("Save", ABCdir+"/Diamond sites "+Genotype+" "+GIN+" D"+DiamondNumber+" "+DateTaken+".zip");
+   roiManager("List");
+    selectWindow("Overlay Elements");
+ saveAs("Results", ABCdir+"/Diamond locations for "+DateTaken+" "+Genotype+GIN+" D"+DiamondNumber+".csv");
+    run("Clear Results");
+   XYpath = File.openDialog("Select XY coord file");
+   XYname=File.getName(XYpath);
+   XYdir= File.getParent(XYpath);
+// draw ovals centred on each ROI from before
+selectWindow(AverageBgCorrected);
+open(XYpath);
+
+  for (i = 0; i < nResults; i++) 
+   { 
+   	  slice=i+1;
+      p= getResult("X", i);
+      q= getResult("Y", i); 
+      qq=getResult("Height",i);
+      pp=getResult("Width",i);
+      p=p+(pp/2)-(ReactionDiameter/2);
+      q=q+(qq/2)-(ReactionDiameter/2);
+	  setSlice(slice);
+	 	makeOval(p,q,ReactionDiameter,ReactionDiameter);
+	   roiManager("Add");
+   } 
+ 
+
+//rename and sort the ROIs to interleave the diamond  shadow and oval ROIs
+
+selectWindow(AverageBgCorrected);
+for (m=0;m<OriginalFrameNumber; m++){
+
+	s=(m+1);
+
+	if(s<10){
+	roiManager("Select",m);
+roiManager("Rename", "000"+s+"-000 Dia");
+	}
+	if(s>=10){
+roiManager("Select",m);
+roiManager("Rename", "00"+s+"-000 Dia");
+}
+}
+roiManager("Sort");
+
+
+// Create inverse ROIs for the diamond shadow then combine with oval
+
+selectWindow(AverageBgCorrected);
+
+for (l=1;l<=nSlices; l++){
+	t=(2*(l-1));
+	u=((2*l)-1);
+setSlice(l);
+	roiManager("Select",t);
+	run("Make Inverse");
+	roiManager("Add");
+	z=((2*OriginalFrameNumber)-1);
+	v=(u+z);
+	ROIs=newArray(v,u);
+	selectWindow(AverageBgCorrected);
+	roiManager("Select",ROIs);
+	roiManager("AND");
+	roiManager("Add");
+}
+   
+// measure the area around diamond shadow (inverse+oval) 
+ 
+selectWindow(AverageBgCorrected);  
+run("Clear Results");
+
+for (k=0;k<nSlices; k++){
+	n=(2*k);
+	z=(2*OriginalFrameNumber);
+	x=(z+1);
+	y=(x+n);
+roiManager("Select",y);
+
+	setSlice(k+1);
+	run("Measure"); 
+}
+//Save output
+run("Select All");
+roiManager("Save", ABCdir+"/All ROIs "+Genotype+" "+GIN+" D"+DiamondNumber+" "+DateTaken+".zip");
+
+selectWindow("Results");
+ saveAs("Results", ABCdir+"/Results for " +DateTaken+" "+Genotype+" "+GIN+" D"+DiamondNumber+".csv");
+   
+ 
