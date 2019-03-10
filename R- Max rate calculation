@@ -1,1 +1,169 @@
 # Language = R
+#Script to find the maximum gradient of a window of the data
+
+#Set working directory
+wd=choose.dir(default = "", caption = "Select WD ")
+setwd(wd)
+
+#locate files
+
+PercentFiledir=choose.dir(default = "", caption = "Select Percent data folder ")
+PercentFileNames=dir(PercentFiledir)
+
+#for all files in directory 
+#Scans along data in windows of length = WindowWidth 
+#creates linear model for each window, saves details if highest gradient so far
+
+
+for(i in 1:length(PercentFileNames)){
+  path<-paste(PercentFiledir,"\\",PercentFileNames[i],sep="")
+  
+  PercentDataframe=read.csv(path,header=TRUE)
+  DiaIdentifier=substr(colnames(PercentDataframe[3]),2,nchar(colnames(PercentDataframe[3])))
+  
+  Time=PercentDataframe[[2]]
+  PercentDia=PercentDataframe[[3]]
+  PercentCont1=PercentDataframe[[4]]
+  PercentCont2=PercentDataframe[[5]]
+  PercentCont3=PercentDataframe[[6]]
+  PercentCont4=PercentDataframe[[7]]
+  WindowWidth=10
+  
+  
+  OldWinDiaCoef=0
+  OldWinDiaTime=numeric()
+  DiaModelSig=FALSE
+  for(i in 1:(1+length(PercentDia)-WindowWidth)){
+    
+    WinDiaData=numeric()
+    WinDiaTime=numeric()
+    LocalWinWidth=1
+    for (r in 1:(WindowWidth-1)){
+      if((Time[[i+r]]-Time[[i]])<=(WindowWidth-1)){LocalWinWidth=LocalWinWidth+1}
+    }
+   if(LocalWinWidth>3){ for(p in 0:(LocalWinWidth-1)){q=(i+p)
+    WinDiaData=c(WinDiaData,PercentDia[[q]])
+    WinDiaTime=c(WinDiaTime,Time[q])}
+    
+    WinDiaLM=lm(WinDiaData~WinDiaTime)
+      
+      if((summary(WinDiaLM)$coefficients[,4])[[2]]<0.05){
+        if((summary(WinDiaLM)$coefficients[,1][[2]])>OldWinDiaCoef){OldWinDiaCoef= summary(WinDiaLM)$coefficients[,1][[2]]
+        OldWinDiaYint= summary(WinDiaLM)$coefficients[,1][1]
+        OldWinDiaTime=WinDiaTime
+        DiaLocalWidth=LocalWinWidth
+        DiaModelSig=TRUE
+        OldDiaWidth=LocalWinWidth
+        DiaWindowStart=WinDiaTime[[1]]
+        }}}}
+
+  #repeats for controls
+  
+  OWinCont1Coef=0
+  OWinCont1Time=numeric()
+  for(i in 1:(1+length(PercentCont1)-WindowWidth)){
+    
+    WinCont1Data=numeric()
+    WinCont1Time=numeric()
+    LocalWinWidth=1
+    for (r in 1:(WindowWidth-1)){
+      if((Time[[i+r]]-Time[[i]])<=(WindowWidth-1)){LocalWinWidth=LocalWinWidth+1}
+    }
+    if(LocalWinWidth>3){for(p in 0:(LocalWinWidth-1)){q=(i+p)
+    WinCont1Data=c(WinCont1Data,PercentCont1[[q]])
+    WinCont1Time=c(WinCont1Time,Time[q])}
+    WinCont1LM=lm(WinCont1Data~WinCont1Time)
+    if((summary(WinCont1LM)$coefficients[,4])[[2]]>0.05){
+      if((summary(WinCont1LM)$coefficients[,1][[2]])>OWinCont1Coef){OWinCont1Coef= summary(WinCont1LM)$coefficients[,1][[2]]
+      OWinCont1Yint= summary(WinDiaLM)$coefficients[,1][1]
+      OWinCont1Time=WinCont1Time[[1]]
+      OldCont1Width=LocalWinWidth}}}}
+  OWinCont2Coef=0
+  OWinCont2Time=numeric()
+  for(i in 1:(1+length(PercentCont2)-WindowWidth)){
+    
+    WinCont2Data=numeric()
+    WinCont2Time=numeric()
+    LocalWinWidth=1
+    for (r in 1:(WindowWidth-1)){
+      if((Time[[i+r]]-Time[[i]])<=(WindowWidth-1)){LocalWinWidth=LocalWinWidth+1}
+    }
+    if(LocalWinWidth>3){for(p in 0:(LocalWinWidth-1)){q=(i+p)
+    WinCont2Data=c(WinCont2Data,PercentCont2[[q]])
+    WinCont2Time=c(WinCont2Time,Time[q])}
+    WinCont2LM=lm(WinCont2Data~WinCont2Time)
+    if((summary(WinCont2LM)$coefficients[,4])[[2]]>0.05){
+      if((summary(WinCont2LM)$coefficients[,1][[2]])>OWinCont2Coef){OWinCont2Coef= summary(WinCont2LM)$coefficients[,1][[2]]
+      OWinCont2Yint= summary(WinDiaLM)$coefficients[,1][1]
+      OWinCont2Time=WinCont2Time[[1]]
+      OldCont2Width=LocalWinWidth}}}}
+  OWinCont3Coef=0
+  OWinCont3Time=numeric()
+  for(i in 1:(1+length(PercentCont3)-WindowWidth)){
+    
+    WinCont3Data=numeric()
+    WinCont3Time=numeric()
+    LocalWinWidth=1
+    for (r in 1:(WindowWidth-1)){
+      if((Time[[i+r]]-Time[[i]])<=(WindowWidth-1)){LocalWinWidth=LocalWinWidth+1}
+    }
+    if(LocalWinWidth>3){ for(p in 0:(LocalWinWidth-1)){q=(i+p)
+    WinCont3Data=c(WinCont3Data,PercentCont3[[q]])
+    WinCont3Time=c(WinCont3Time,Time[q])}
+    WinCont3LM=lm(WinCont3Data~WinCont3Time)
+    if((summary(WinCont3LM)$coefficients[,4])[[2]]>0.05){
+      if((summary(WinCont3LM)$coefficients[,1][[2]])>OWinCont3Coef){OWinCont3Coef= summary(WinCont3LM)$coefficients[,1][[2]]
+      OWinCont3Yint= summary(WinDiaLM)$coefficients[,1][1]
+      OWinCont3Time=WinCont3Time[[1]]
+      OldCont3Width=LocalWinWidth}}}}
+  OWinCont4Coef=0
+  OWinCont4Time=numeric()
+  for(i in 1:(1+length(PercentCont4)-WindowWidth)){
+    
+    WinCont4Data=numeric()
+    WinCont4Time=numeric()
+    LocalWinWidth=1
+    for (r in 1:(WindowWidth-1)){
+      if((Time[[i+r]]-Time[[i]])<=(WindowWidth-1)){LocalWinWidth=LocalWinWidth+1}
+    }
+    if(LocalWinWidth>3){ for(p in 0:(LocalWinWidth-1)){q=(i+p)
+    WinCont4Data=c(WinCont4Data,PercentCont4[[q]])
+    WinCont4Time=c(WinCont4Time,Time[q])}
+    WinCont4LM=lm(WinCont4Data~WinCont4Time)
+    if((summary(WinCont4LM)$coefficients[,4])[[2]]>0.05){
+      if((summary(WinCont4LM)$coefficients[,1][[2]])>OWinCont4Coef){OWinCont4Coef=summary(WinCont4LM)$coefficients[,1][[2]]
+      OWinCont4Yint= summary(WinDiaLM)$coefficients[,1][1]
+      OWinCont4Time=WinCont4Time[[1]]
+      OldCont4Width=LocalWinWidth}}}}
+  
+  #groups output together
+  
+  AllContCoeff=c(OWinCont1Coef,OWinCont2Coef,OWinCont3Coef,OWinCont4Coef)
+  AdjustedCoef=(OldWinDiaCoef-mean(AllContCoeff))
+  
+  #if diamond model fits better than p<0.05, save output file, giving the maximum gradient for diamond site and control sites
+
+   if(DiaModelSig==TRUE){
+    Datasummary=data.frame(DiaIdentifier,AdjustedCoef,OldWinDiaTime,OldWinDiaCoef,OWinCont1Coef,OWinCont1Time,OWinCont2Coef,OWinCont2Time,OWinCont3Coef,OWinCont3Time,OWinCont4Coef,OWinCont4Time)}    
+  write.csv(Datasummary,file=paste("Top rolling -time- for ",DiaIdentifier,".csv"))
+ 
+  #create graph to summarise data and trendline
+  Ymat=cbind(PercentDia,PercentCont1,PercentCont2,PercentCont3,PercentCont4)
+  
+  
+  tiff(paste('MaxGradLMfor',DiaIdentifier,'.tif'))
+  
+  par(mar=c(5.1, 4.1, 4.1, 8.1),no.readonly=FALSE)
+    matplot(Time,Ymat, type = c("p"),pch=c(19,1,1,1,1),col = c(1,2,3,4,5))
+  abline(OldWinDiaYint ,AdjustedCoef, col=c(1),lwd=2)
+  
+  par(xpd=TRUE)
+  legend(35,10, legend = c("AdjustedPercentDia"), col=1, pch=c(19)) 
+  
+  dev.off()
+}
+rm(list=ls())
+
+
+
+
