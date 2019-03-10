@@ -11,8 +11,8 @@ ABCpath = File.openDialog("Select image File");
   //Gather information about file
   
   Dialog.create("Diamond Data")
-   Dialog.addChoice("Date Taken",newArray("14th","15th","20th","21st")); 
-   Dialog.addChoice("Genotype", newArray("Triple","og","Exo84b","ARP2")); 
+   Dialog.addChoice("Date Taken",newArray("Various  Date options")); 
+   Dialog.addChoice("Genotype", newArray("ForminTriple","Col0","exo84b","arp2")); 
    Dialog.addNumber("GIN", 1); 
    Dialog.addNumber("Cell Number",1); 
    Dialog.addString("Diamonds present", "spaces, no commas e.g. D1 D2")
