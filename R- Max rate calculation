@@ -162,8 +162,63 @@ for(i in 1:length(PercentFileNames)){
   
   dev.off()
 }
-rm(list=ls())
 
+#create empty variables
+
+GroupTriple=numeric(0)
+TripleID=character(0)
+GroupARP=numeric(0)
+ARPID=character(0)
+GroupExo=numeric(0)
+ExoID=character(0)
+GroupCont=numeric(0)
+ContID=character(0)
+GroupControls=numeric(0)
+
+#for each genotype, gathered the data files output before and tests with kruskal and Dunn's tests
+TripleFiledir=choose.dir(default = "", caption = "Select Percent data folder ")
+TripleFileNames=dir(TripleFiledir)
+for(i in 1:length(TripleFileNames)){
+  path<-paste(TripleFiledir,"\\",TripleFileNames[i],sep="")
+  TripleDataframe = read.csv(path,header=TRUE)
+  DiaIdentifier=substr(TripleFileNames,(nchar(TripleFileNames)-24),(nchar(TripleFileNames)-4))
+  GroupTriple=c(GroupTriple,TripleDataframe[1,5])
+  GroupControls=c(GroupControls,TripleDataframe[1,6],TripleDataframe[1,8],TripleDataframe[1,10],TripleDataframe[1,12])
+  TripleID=c(TripleID,DiaIdentifier[i])
+}
+ExoFiledir=choose.dir(default = "", caption = "Select Percent data folder ")
+ExoFileNames=dir(ExoFiledir)
+for(i in 1:length(ExoFileNames)){
+  path<-paste(ExoFiledir,"\\",ExoFileNames[i],sep="")
+  ExoDataframe = read.csv(path,header=TRUE)
+  DiaIdentifier=substr(ExoFileNames,(nchar(ExoFileNames)-24),(nchar(ExoFileNames)-4))
+  GroupExo=c(GroupExo,ExoDataframe[1,5])
+  GroupControls=c(GroupControls,ExoDataframe[1,6],ExoDataframe[1,8],ExoDataframe[1,10],ExoDataframe[1,12])
+  ExoID=c(ExoID,DiaIdentifier[i])
+}
+ARPFiledir=choose.dir(default = "", caption = "Select Percent data folder ")
+ARPFileNames=dir(ARPFiledir)
+for(i in 1:length(ARPFileNames)){
+  path<-paste(ARPFiledir,"\\",ARPFileNames[i],sep="")
+  ARPDataframe = read.csv(path,header=TRUE)
+  DiaIdentifier=substr(ARPFileNames,(nchar(ARPFileNames)-24),(nchar(ARPFileNames)-4))
+  GroupARP=c(GroupARP,ARPDataframe[1,5])
+  GroupControls=c(GroupControls,ARPDataframe[1,6],ARPDataframe[1,8],ARPDataframe[1,10],ARPDataframe[1,12])
+  ARPID=c(ARPID,DiaIdentifier[i])
+}
+ContFiledir=choose.dir(default = "", caption = "Select Percent data folder ")
+ContFileNames=dir(ContFiledir)
+for(i in 1:length(ContFileNames)){
+  path<-paste(ContFiledir,"\\",ContFileNames[i],sep="")
+  ContDataframe = read.csv(path,header=TRUE)
+  DiaIdentifier=substr(ContFileNames,(nchar(ContFileNames)-24),(nchar(ContFileNames)-4))
+  GroupCont=c(GroupCont,ContDataframe[1,5])
+  GroupControls=c(GroupControls,ContDataframe[1,6],ContDataframe[1,8],ContDataframe[1,10],ContDataframe[1,12])
+  ContID=c(ContID,DiaIdentifier[i])
+}
+KTest=kruskal.test(list(GroupARP,GroupExo,GroupTriple,GroupCont))
+library(dunn.test)
+dunn.test::dunn.test(list(GroupARP,GroupExo,GroupTriple,GroupCont),method ="bonferroni")
 
 
 
