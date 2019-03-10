@@ -1,0 +1,92 @@
+# language = R
+# Code to compare diamond site gradients against control site gradients 
+# to determine if 'reacted' i.e. gradient was over a threshold 
+
+
+#for 4 loops (1 per genotype) set working directory and the input folder
+for(e in 1:4){
+  wd=choose.dir(default = "", caption = "Select WD ")
+setwd(wd)
+  PercentFiledir=choose.dir(default = "", caption = "Select Percent data folder ")
+PercentFileNames=dir(PercentFiledir)
+
+#create variables
+
+totalDiamondCoef=numeric()
+totalControlscoef=numeric()
+
+#read data for files in folder
+
+for(i in 1:length(PercentFileNames)){
+  
+  path<-paste(PercentFiledir,"\\",PercentFileNames[i],sep="")
+  PercentDataframe=read.csv(path,header=TRUE)
+  DiaIdentifier=substr(colnames(PercentDataframe[3]),2,nchar(colnames(PercentDataframe[3])))
+  
+
+Time=PercentDataframe[[2]]
+PercentDia=PercentDataframe[[3]]
+PercentCon1=PercentDataframe[[4]]
+PercentCon2=PercentDataframe[[5]]
+PercentCon3=PercentDataframe[[6]]
+PercentCon4=PercentDataframe[[7]]
+
+#create linear models of diamond and control sites
+
+DiamondLM <- lm(PercentDia ~ Time)
+ControlLM1 <- lm(PercentCon1 ~ Time)
+ControlLM2 <- lm(PercentCon2 ~ Time)
+ControlLM3 <- lm(PercentCon3 ~ Time)
+ControlLM4 <- lm(PercentCon4 ~ Time)
+
+#call the gradient (coefficient)
+
+DiaCoefficent=summary(lm(PercentDia ~ Time))$coefficients[,1][2]
+Cont1Coefficent=summary(lm(PercentCon1 ~ Time))$coefficients[,1][2]
+Cont2Coefficent=summary(lm(PercentCon2 ~ Time))$coefficients[,1][2]
+Cont3Coefficent=summary(lm(PercentCon3 ~ Time))$coefficients[,1][2]
+Cont4Coefficent=summary(lm(PercentCon4 ~ Time))$coefficients[,1][2]
+
+AllContCoeff=cbind(Cont1Coefficent,Cont2Coefficent,Cont3Coefficent,Cont4Coefficent)
+
+#Compare control and diamond sites
+
+if(length(AllContCoeff)>1){DiaThreshold=(max(AllContCoeff)+(2*sd(AllContCoeff)))} else{DiaThreshold=9999}
+if(DiaCoefficent>DiaThreshold) {IsDiaGreaterCont=TRUE} else {IsDiaGreaterCont=FALSE}
+
+#save output
+
+if(DiaCoefficent>DiaThreshold) {totalDiamondCoef=c(totalDiamondCoef,DiaCoefficent)
+                                totalControlscoef=c(totalControlscoef,AllContCoeff)
+SignificanceSummary=data.frame(DiaCoefficent,IsDiaGreaterCont,C1used,C2used,C3used,C4used)
+write.csv(SignificanceSummary,file=paste("Significance and LM for ",DiaIdentifier,".csv"))
+
+#create graph to show all gradients 
+
+tiff(paste('MaxGradLMfor',DiaIdentifier,'.tif'))
+
+Ymat=cbind(PercentDia,PercentCon1,PercentCon2,PercentCon3,PercentCon4)
+par(mar=c(5.1, 4.1, 4.1, 8.1),no.readonly=FALSE)
+matplot(Time,Ymat, type = c("p"),pch=c(19,1,1,1,1),col = c(1,2,3,4,5))
+abline((summary(DiamondLM)$coefficients[,1][[1]]) ,summary(DiamondLM)$coefficients[2,1][[1]], col=c(1),lwd=2)
+abline((summary(ControlLM1)$coefficients[,1][[1]]) ,summary(ControlLM1)$coefficients[2,1][[1]], col=c(1),lty=3,lwd=1)
+abline((summary(ControlLM2)$coefficients[,1][[1]]) ,summary(ControlLM2)$coefficients[2,1][[1]], col=c(1),lty=3,lwd=1)
+abline((summary(ControlLM3)$coefficients[,1][[1]]) ,summary(ControlLM3)$coefficients[2,1][[1]], col=c(1),lty=3,lwd=1)
+abline((summary(ControlLM4)$coefficients[,1][[1]]) ,summary(ControlLM4)$coefficients[2,1][[1]], col=c(1),lty=3,lwd=1)
+
+par(xpd=TRUE)
+legend(35,10, legend = c("Diacoeff"), col=1, pch=c(19)) 
+
+dev.off()
+}}
+#calculate reaction ratio
+
+Reactionratio=length(totalDiamondCoef)/length(PercentFileNames)
+write.csv(data.frame(Reactionratio,length(PercentFileNames),totalDiamondCoef),file=paste("Reaction Ratio for ",DiaIdentifier,".csv"))
+
+}
+
+#use dunn.test and fisher.test functions to test data in the output files
+
+
+
