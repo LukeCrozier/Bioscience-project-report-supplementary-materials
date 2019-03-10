@@ -1,0 +1,79 @@
+// Macro to mean pixel value of polygon ROIs saved in ROI manager - ImageJ1 Macro Language
+
+//Locate source files
+
+ABCpath = File.openDialog("Select image File");
+   AverageBgCorrected=File.getName(ABCpath);
+   ABCdir= File.getParent(ABCpath);
+   XYpath = File.openDialog("Select XY coord file");
+   XYname=File.getName(XYpath);
+   XYdir= File.getParent(XYpath);
+      open(ABCpath);
+
+//gather data about file
+  
+  Dialog.create("Diamond Data")
+   Dialog.addChoice("Date Taken",newArray("Various Date options")); 
+   Dialog.addChoice("Genotype", newArray("Triple","og","Exo84b","ARP2")); 
+   Dialog.addNumber("GIN", 1); 
+   Dialog.addNumber("Cell Number",1); 
+   Dialog.addNumber("Control Number",1); 
+   Dialog.addNumber("Reaction Diameter",75); 
+   Dialog.show();
+   DateTaken = Dialog.getChoice();
+   Genotype = Dialog.getChoice();;
+   GIN = Dialog.getNumber();
+   CellNumber = Dialog.getNumber();;
+   ControlNumber = Dialog.getNumber();;;
+   ReactionDiameter = Dialog.getNumber();;;;
+   open(ABCpath);
+   selectWindow(AverageBgCorrected);
+   OriginalFrameNumber=nSlices;
+
+//record the ROI then make copies at each frame adjusted by the XY drift in the XY coord file
+   
+	open(XYpath);
+		roiManager("Select",0);
+    Roi.getBounds(x, y, width, height);
+roiManager("Save", ABCdir+"/Control "+ControlNumber+" centre ROI "+Genotype+" "+GIN+" Cell "+CellNumber+" "+DateTaken+".zip");
+roiManager("reset");
+	for (o=0;o<OriginalFrameNumber; o++){ 
+		
+   	  slice=o+1; 
+      p= getResult("x", 0);
+      q= getResult("y", 0); 
+      r= getResult("x",o);
+      s= getResult("y",o);
+     
+      t=(r-p);
+      u=(s-q);
+      t=t-(ReactionDiameter/2);
+      u=u-(ReactionDiameter/2);
+      
+      v=(x+t);
+      w=(y+u);
+	 
+	  setSlice(slice);
+	 	makeOval(v,w,ReactionDiameter,ReactionDiameter);
+	   roiManager("Add");
+   
+	  
+   } 
+
+   //save the output ROIs
+   run("Select All");
+roiManager("Save", ABCdir+"/All Control "+ControlNumber+" ROIs "+Genotype+" "+GIN+" Cell "+CellNumber+" "+DateTaken+".zip");
+
+// measure and record the mean pixel value of the ROI at each time point
+
+for (i=0;i<OriginalFrameNumber; i++){ 
+
+roiManager("Select",i);
+
+	setSlice(i+1);
+	run("Measure"); 
+}
+    selectWindow("Results");
+ saveAs("Results", ABCdir+"/Results for Control "+ControlNumber+" "+Genotype+" "+GIN+" Cell "+CellNumber+" "+DateTaken+".csv");
+
+ 
